@@ -17,6 +17,7 @@ bool h12;
 bool PM;
 bool alarmEN;
 String templete = "HH:MM:SS  TT.ttC|D MM/DD   HH.hh%";
+String templete1= "HH:MM:SS  -MODE |"
 String input;
 String Mediate;
 int Year;
