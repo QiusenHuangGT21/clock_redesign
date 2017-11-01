@@ -7,6 +7,8 @@
 
 #define DHT22_PIN 4
 #define Alarm 7
+#define Mode 8
+#define cMode 9
 
 LiquidCrystal_I2C lcd(0x3f, 16, 2);
 dht DHT;
@@ -16,8 +18,14 @@ bool Century = false;
 bool h12;
 bool PM;
 bool alarmEN;
+bool ModeV;
+bool cModeV;
 String templete = "HH:MM:SS  TT.ttC|D MM/DD   HH.hh%";
-String templete1= "HH:MM:SS  -MODE |"
+int templeteCol[] = {1,4,7,11,1,3,6,11}
+int templeteRow[] = {1,1,1,1,2,2,2,2}
+String templete1= "HH:MM:SS  -MODE |TT.TC  -CH:CM:CS";
+int templete1Col[] = {1,4,7,12,1,9};
+int templete1Row[] = {1,1,1,1,2,2};
 String input;
 String Mediate;
 int Year;
@@ -31,6 +39,12 @@ int aHour;
 int aMinute;
 int aLast;
 int aSnooze;
+int cdH;
+int cdM;
+int cdS;
+String templeteV=templete;
+int T0;
+int deltaT;
 
 void lcdPrintMonth(int column, int row) {
   lcd.setCursor(column - 1, row - 1);
@@ -142,24 +156,32 @@ void getAlarm() {
   }
 }
 
+//runtime
+void main(String templete){
+  if(templete)
+  
+}
+
 //Setting
-void loadTemplete(String templete) {
+void refresh(String templete) {
   String temp = templete.substring(0, 16);
   lcd.setCursor(0, 0);
   lcd.print(temp);
   temp = templete.substring(17, 33);
   lcd.setCursor(0, 1);
   lcd.print(temp);
-}
-void refresh() {
-  lcdPrintHour(1, 1);
-  lcdPrintMinute(4, 1);
-  lcdPrintSecond(7, 1);
-  lcdPrintDOW(1, 2);
-  lcdPrintMonth(3, 2);
-  lcdPrintDate(6, 2);
-  lcdPrintTMP(11, 1);
-  lcdPrintHUM(11, 2);
+  if (templete = "templete"){
+  lcdPrintHour(templeteCol[0], templeteRow[0]);
+  lcdPrintMinute(templeteCol[1], templeteRow[1]);
+  lcdPrintSecond(templeteCol[2], templeteRow[2];
+  lcdPrintDOW(templeteCol[3], templeteRow[3]);
+  lcdPrintMonth(templeteCol[4], templeteRow[4];
+  lcdPrintDate(templeteCol[5], templeteRow[5]);
+  lcdPrintTMP(templeteCol[6], templeteRow[6]);
+  lcdPrintHUM(templeteCol[7], templeteRow[7]);
+  } else if (templete = "templete1"){
+    
+  }
   getAlarm();
 }
 String getInput(int mili, int second) {
@@ -187,16 +209,21 @@ void setup() {
   Wire.begin();
   Serial.begin(9600);
   pinMode(Alarm, OUTPUT);
+  pinMode(Mode,INPUT_PULLUP);
+  pinMode(cMode, INPUT_PULLUP);
   lcd.init();
   lcd.backlight();
   int chk = DHT.read22(DHT22_PIN);
   //loading display templete
   //complete refresh
-  loadTemplete(templete);
-  refresh();
+  
+  refresh(templeteV);
 
 }
 void loop() {
+
+  //UI
+  
   if (Serial.available() > 0) {
     input = getInput(2, 30);
 
@@ -320,11 +347,17 @@ void loop() {
       }
     }
     lcd.clear();
-    loadTemplete(templete);
-    refresh();
+    refresh(templeteV);
   }
 
-  //Time Display  new stuff   
+  //buttoms
+  if(digitalRead(Mode)==LOW){
+    
+  }
+
+  //Time Display
+  if 
+  
 
 
 }
