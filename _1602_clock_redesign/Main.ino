@@ -19,11 +19,15 @@ bool h12;
 bool PM;
 bool alarmEN;
 String templete = "HH:MM:SS  TT.ttC|D MM/DD   HH.hh%";
+<<<<<<< HEAD
 int templeteCol[] = {1, 4, 7, 11, 1, 3, 6, 11};
 int templeteRow[] = {1, 1, 1, 1, 2, 2, 2, 2};
 String templete1 = "HH:MM:SS  TEXT..|TT.TC  -CH:CM:CS";
 int templete1Col[] = {1, 4, 7, 12, 1, 9};
 int templete1Row[] = {1, 1, 1, 1, 2, 2};
+=======
+String templete1= "HH:MM:SS  -MODE |"
+>>>>>>> parent of 9c3ec8c... first test
 String input;
 String Mediate;
 
@@ -194,7 +198,7 @@ String getInput(int mili, int second) {
   int i;
   second = second * 10;
   String serialInput = "";
-  while (Serial.available() == 0 && (i < second)) {
+  while (Serial.available() == 0 || (i < second)) {
     delay(100);
     i = i + 1;
   }
@@ -237,7 +241,6 @@ void setup() {
 void loop() {
   if (Serial.available() > 0) {
     input = getInput(2, 30);
-    Serial.println(input);
 
     if (input == "set time") {
       Serial.println("Time Setting Mode");
@@ -269,15 +272,20 @@ void loop() {
       if (input.length() >= 15) {
 
         Serial.print("New Date:");
-        Serial.println(input.substring(0, 8));
+        Serial.println(input.substring(0, 9));
         Serial.print("New DOW:");
-        Serial.println(input.substring(8, 9));
+        Serial.println(input.substring(9, 10));
         Serial.print("New Time:");
-        Serial.println(input.substring(9, 15));
+        Serial.println(input.substring(10, 16));
         Serial.println("Are you sure? 0/1)");
 
+<<<<<<< HEAD
         Mediate = getInput(2, 30);
         if (Mediate != "0") {
+=======
+        input = getInput(2, 30);
+        if (input != "0") {
+>>>>>>> parent of 9c3ec8c... first test
 
           Mediate = input.substring(2, 4);
           Year = Mediate.toInt();
@@ -291,22 +299,21 @@ void loop() {
           Date = Mediate.toInt();
           Clock.setDate(Date);
 
-          Mediate = input.substring(8, 9);
+          Mediate = input.substring(9, 10);
           DoW = Mediate.toInt();
           Clock.setDoW(DoW);
 
-          Mediate = input.substring(9, 11);
+          Mediate = input.substring(10, 12);
           Hour = Mediate.toInt();
           Clock.setHour(Hour);
 
-          Mediate = input.substring(11, 13);
+          Mediate = input.substring(12, 14);
           Minute = Mediate.toInt();
           Clock.setMinute(Minute);
 
-          Mediate = input.substring(13, 15);
+          Mediate = input.substring(14, 16);
           Second = Mediate.toInt();
           Clock.setSecond(Second);
-          Serial.println("Complete");
         }
       } else {
         Serial.print("Check your formatt!");
@@ -367,16 +374,31 @@ void loop() {
           Serial.print("Alarm Disabled");
         }
       }
+<<<<<<< HEAD
 
     } else {
       Serial.println("wrong command");
+=======
+      else if (input == "0") {
+        EEPROM.update(4, 0);
+        Serial.print("Alarm Disabled");
+      }
+>>>>>>> parent of 9c3ec8c... first test
     }
     lcd.clear();
 
     refresh("default");
   }
+<<<<<<< HEAD
   //time keeping
 
 
+=======
+
+  //Time Display  new stuff   
+
+
+}
+>>>>>>> parent of 9c3ec8c... first test
 }
 
