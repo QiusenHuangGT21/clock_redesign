@@ -17,7 +17,7 @@ bool h12;
 bool PM;
 bool alarmEN;
 String templete = "HH:MM:SS  TT.ttC|D MM/DD   HH.hh%";
-String templete1= "HH:MM:SS  -MODE |"
+String templete1= "HH:MM:SS  -MODE |";
 String input;
 String Mediate;
 int Year;
@@ -166,7 +166,7 @@ String getInput(int mili, int second) {
   int i;
   second = second * 10;
   String serialInput = "";
-  while (Serial.available() == 0 || (i < second)) {
+  while (Serial.available() == 0 && (i < second)) {
     delay(100);
     i = i + 1;
   }
@@ -199,6 +199,7 @@ void setup() {
 void loop() {
   if (Serial.available() > 0) {
     input = getInput(2, 30);
+    Serial.println(input);
 
     if (input == "set time") {
       Serial.println("Time Setting Mode");
@@ -230,16 +231,16 @@ void loop() {
       if (input != "timeout") {
 
         Serial.print("New Date:");
-        Serial.println(input.substring(0, 9));
+        Serial.println(input.substring(0, 8));
         Serial.print("New DOW:");
-        Serial.println(input.substring(9, 10));
+        Serial.println(input.substring(8, 9));
         Serial.print("New Time:");
-        Serial.println(input.substring(10, 16));
+        Serial.println(input.substring(9, 15));
         Serial.println("Are you sure? 0/1)");
 
-        input = getInput(2, 30);
-        if (input != "0") {
-
+        Mediate = getInput(2, 30);
+        if (Mediate != "0") {
+         
           Mediate = input.substring(2, 4);
           Year = Mediate.toInt();
           Clock.setYear(Year);
@@ -252,21 +253,22 @@ void loop() {
           Date = Mediate.toInt();
           Clock.setDate(Date);
 
-          Mediate = input.substring(9, 10);
+          Mediate = input.substring(8, 9);
           DoW = Mediate.toInt();
           Clock.setDoW(DoW);
 
-          Mediate = input.substring(10, 12);
+          Mediate = input.substring(9, 11);
           Hour = Mediate.toInt();
           Clock.setHour(Hour);
 
-          Mediate = input.substring(12, 14);
+          Mediate = input.substring(11, 13);
           Minute = Mediate.toInt();
           Clock.setMinute(Minute);
 
-          Mediate = input.substring(14, 16);
+          Mediate = input.substring(13, 15);
           Second = Mediate.toInt();
           Clock.setSecond(Second);
+          Serial.println("Complete");
         }
       }
     }
@@ -319,14 +321,14 @@ void loop() {
         Serial.print("Alarm Disabled");
       }
     }
+
+  } else{
+    Serial.println("wrong command");  
+}
     lcd.clear();
     loadTemplete(templete);
     refresh();
   }
-
-  //Time Display  new stuff   
-
-
-}
+  
 }
 
