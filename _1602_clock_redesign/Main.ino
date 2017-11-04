@@ -5,8 +5,10 @@
 #include <MsTimer2.h>
 #include <EEPROM.h>
 
+
 #define DHT22_PIN 4
 #define Alarm 7
+
 
 LiquidCrystal_I2C lcd(0x3f, 16, 2);
 dht DHT;
@@ -17,9 +19,14 @@ bool h12;
 bool PM;
 bool alarmEN;
 String templete = "HH:MM:SS  TT.ttC|D MM/DD   HH.hh%";
-String templete1= "HH:MM:SS  -MODE |";
+int templeteCol[] = {1, 4, 7, 11, 1, 3, 6, 11};
+int templeteRow[] = {1, 1, 1, 1, 2, 2, 2, 2};
+String templete1 = "HH:MM:SS  TEXT..|TT.TC  -CH:CM:CS";
+int templete1Col[] = {1, 4, 7, 12, 1, 9};
+int templete1Row[] = {1, 1, 1, 1, 2, 2};
 String input;
 String Mediate;
+
 int Year;
 int Month;
 int Date;
@@ -31,6 +38,12 @@ int aHour;
 int aMinute;
 int aLast;
 int aSnooze;
+int cdH;
+int cdM;
+int cdS;
+String templeteV = templete;
+int T0;
+int deltaT;
 
 void lcdPrintMonth(int column, int row) {
   lcd.setCursor(column - 1, row - 1);
@@ -143,24 +156,39 @@ void getAlarm() {
 }
 
 //Setting
-void loadTemplete(String templete) {
-  String temp = templete.substring(0, 16);
-  lcd.setCursor(0, 0);
-  lcd.print(temp);
-  temp = templete.substring(17, 33);
-  lcd.setCursor(0, 1);
-  lcd.print(temp);
-}
-void refresh() {
-  lcdPrintHour(1, 1);
-  lcdPrintMinute(4, 1);
-  lcdPrintSecond(7, 1);
-  lcdPrintDOW(1, 2);
-  lcdPrintMonth(3, 2);
-  lcdPrintDate(6, 2);
-  lcdPrintTMP(11, 1);
-  lcdPrintHUM(11, 2);
+
+
+void refresh(String Templete) {
+  if (Templete == "default") {
+    String temp;
+    
+    temp = templete.substring(0, 16);
+    lcd.setCursor(0, 0);
+    lcd.print(temp);
+    temp = templete.substring(17, 33);
+    lcd.setCursor(0, 1);
+    lcd.print(temp);
+    lcdPrintHour(templeteCol[0], templeteRow[0]);
+    lcdPrintMinute(templeteCol[1], templeteRow[1]);
+    lcdPrintSecond(templeteCol[2], templeteRow[2]);
+                   lcdPrintDOW(templeteCol[3], templeteRow[3]);
+                   lcdPrintMonth(templeteCol[4], templeteRow[4]);
+                                 lcdPrintDate(templeteCol[5], templeteRow[5]);
+                                 lcdPrintTMP(templeteCol[6], templeteRow[6]);
+                                 lcdPrintHUM(templeteCol[7], templeteRow[7]);
+  } else if (Templete == "cd") {
+    String temp;
+    temp = templete1.substring(0, 16);
+    lcd.setCursor(0, 0);
+    lcd.print(temp);
+    temp = templete1.substring(17, 33);
+    lcd.setCursor(0, 1);
+    lcd.print(temp);
+    
+  }
+
   getAlarm();
+  
 }
 String getInput(int mili, int second) {
   int i;
@@ -180,6 +208,16 @@ String getInput(int mili, int second) {
   return serialInput;
 }
 
+void flash(int mili, int iter) {
+  int i = 1;
+  while (i < iter) {
+    lcd.noBacklight();
+    delay(mili);
+    lcd.backlight();
+    delay(mili);
+    i = i + 1;
+  }
+}
 
 
 void setup() {
@@ -192,8 +230,8 @@ void setup() {
   int chk = DHT.read22(DHT22_PIN);
   //loading display templete
   //complete refresh
-  loadTemplete(templete);
-  refresh();
+
+  refresh("default");
 
 }
 void loop() {
@@ -228,7 +266,7 @@ void loop() {
       }
 
       input = getInput(2, 30);
-      if (input != "timeout") {
+      if (input.length() >= 15) {
 
         Serial.print("New Date:");
         Serial.println(input.substring(0, 8));
@@ -240,7 +278,7 @@ void loop() {
 
         Mediate = getInput(2, 30);
         if (Mediate != "0") {
-         
+
           Mediate = input.substring(2, 4);
           Year = Mediate.toInt();
           Clock.setYear(Year);
@@ -270,15 +308,23 @@ void loop() {
           Clock.setSecond(Second);
           Serial.println("Complete");
         }
+      } else {
+        Serial.print("Check your formatt!");
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Check your formatt!");
+        flash(500, 3);
+
+
       }
     }
     else if (input == "alarm") {
       lcd.clear();
-      lcd.setCursor(0,0);
+      lcd.setCursor(0, 0);
       lcd.print("Setting Alarm");
       Serial.println("Alarm Setting");
       Serial.println("Toggle alarm 0/1");
-      input = getInput(2,30);
+      input = getInput(2, 30);
       if (input != "0") {
         EEPROM.update(4, 1);
         aHour = EEPROM.read(0);
@@ -296,39 +342,41 @@ void loop() {
         Serial.println("HHMMLLSS");
 
         input = getInput(2, 30);
-        if (input != "timeout"){
+        if (input != "timeout") {
           Serial.print("New Date:");
-        Serial.println(input.substring(0, 9));
-        Serial.print("New DOW:");
-        Serial.println(input.substring(9, 10));
-        Serial.print("New Time:");
-        Serial.println(input.substring(10, 16));
-        Serial.println("Are you sure? 0/1)");
+          Serial.println(input.substring(0, 9));
+          Serial.print("New DOW:");
+          Serial.println(input.substring(9, 10));
+          Serial.print("New Time:");
+          Serial.println(input.substring(10, 16));
+          Serial.println("Are you sure? 0/1)");
 
-        if (input != "0" || input != "timeout") {
-          Mediate = input.substring(0, 2);
-          EEPROM.update(0, Mediate.toInt());
-          Mediate = input.substring(2, 4);
-          EEPROM.update(1, Mediate.toInt());
-          Mediate = input.substring(4, 6);
-          EEPROM.update(2, Mediate.toInt());
-          Mediate = input.substring(6, 8);
-          EEPROM.update(3, Mediate.toInt());
+          if (input != "0" || input != "timeout") {
+            Mediate = input.substring(0, 2);
+            EEPROM.update(0, Mediate.toInt());
+            Mediate = input.substring(2, 4);
+            EEPROM.update(1, Mediate.toInt());
+            Mediate = input.substring(4, 6);
+            EEPROM.update(2, Mediate.toInt());
+            Mediate = input.substring(6, 8);
+            EEPROM.update(3, Mediate.toInt());
+          }
+        }
+        else if (input == "0") {
+          EEPROM.update(4, 0);
+          Serial.print("Alarm Disabled");
         }
       }
-      else if (input == "0") {
-        EEPROM.update(4, 0);
-        Serial.print("Alarm Disabled");
-      }
-    }
 
-  } else{
-    Serial.println("wrong command");  
-}
+    } else {
+      Serial.println("wrong command");
+    }
     lcd.clear();
-    loadTemplete(templete);
-    refresh();
+
+    refresh("default");
   }
-  
+  //time keeping
+
+
 }
 
