@@ -19,18 +19,15 @@ bool h12;
 bool PM;
 bool alarmEN;
 String templete = "HH:MM:SS  TT.ttC|D MM/DD   HH.hh%";
-<<<<<<< HEAD
+
 int templeteCol[] = {1, 4, 7, 11, 1, 3, 6, 11};
 int templeteRow[] = {1, 1, 1, 1, 2, 2, 2, 2};
 String templete1 = "HH:MM:SS  TEXT..|TT.TC  -CH:CM:CS";
 int templete1Col[] = {1, 4, 7, 12, 1, 9};
 int templete1Row[] = {1, 1, 1, 1, 2, 2};
-=======
-String templete1= "HH:MM:SS  -MODE |"
->>>>>>> parent of 9c3ec8c... first test
 String input;
 String Mediate;
-
+bool next;
 int Year;
 int Month;
 int Date;
@@ -59,6 +56,7 @@ void lcdPrintMonth(int column, int row) {
     lcd.print(Clock.getMonth(Century), DEC);
   }
   //lcd.print('/');
+
 }
 
 void lcdPrintDate(int column, int row) {
@@ -114,9 +112,14 @@ void lcdPrintTMP(int column, int row) {
   //lcd.print('C');
 }
 
-void lcdPrintHour(int column, int row) {
+bool lcdPrintHour(int column, int row) {
   lcd.setCursor(column - 1, row - 1);
   Dis = Clock.getHour(h12, PM);
+  if (Dis == 0) {
+    next = true;
+  } else {
+    next = false;
+  }
   if (Dis < 10) {
     lcd.print("0");
     lcd.print(Dis);
@@ -125,10 +128,16 @@ void lcdPrintHour(int column, int row) {
   }
 
   //lcd.print(':');
+  return next;
 }
-void lcdPrintMinute(int column, int row) {
+bool lcdPrintMinute(int column, int row) {
   lcd.setCursor(column - 1, row - 1);
   Dis = Clock.getMinute();
+  if (Dis == 0) {
+    next = true;
+  } else {
+    next = false;
+  }
   if (Dis < 10) {
     lcd.print("0");
     lcd.print(Dis);
@@ -136,17 +145,24 @@ void lcdPrintMinute(int column, int row) {
     lcd.print(Clock.getMinute(), DEC);
   }
   //lcd.print(':');
+  return next;
 }
 
-void lcdPrintSecond(int column, int row) {
+bool lcdPrintSecond(int column, int row) {
   lcd.setCursor(column - 1, row - 1);
   Dis = Clock.getSecond();
+  if (Dis == 0) {
+    next = true;
+  } else {
+    next = false;
+  }
   if (Dis < 10) {
     lcd.print("0");
     lcd.print(Dis);
   } else {
     lcd.print(Dis);
   }
+  return next;
 }
 void getAlarm() {
   if (EEPROM.read(4) == 1) {
@@ -165,7 +181,7 @@ void getAlarm() {
 void refresh(String Templete) {
   if (Templete == "default") {
     String temp;
-    
+
     temp = templete.substring(0, 16);
     lcd.setCursor(0, 0);
     lcd.print(temp);
@@ -175,11 +191,11 @@ void refresh(String Templete) {
     lcdPrintHour(templeteCol[0], templeteRow[0]);
     lcdPrintMinute(templeteCol[1], templeteRow[1]);
     lcdPrintSecond(templeteCol[2], templeteRow[2]);
-                   lcdPrintDOW(templeteCol[3], templeteRow[3]);
-                   lcdPrintMonth(templeteCol[4], templeteRow[4]);
-                                 lcdPrintDate(templeteCol[5], templeteRow[5]);
-                                 lcdPrintTMP(templeteCol[6], templeteRow[6]);
-                                 lcdPrintHUM(templeteCol[7], templeteRow[7]);
+    lcdPrintTMP(templeteCol[3], templeteRow[3]);
+    lcdPrintDOW(templeteCol[4], templeteRow[4]);
+    lcdPrintMonth(templeteCol[5], templeteRow[5]);
+    lcdPrintDate(templeteCol[6], templeteRow[6]);
+    lcdPrintHUM(templeteCol[7], templeteRow[7]);
   } else if (Templete == "cd") {
     String temp;
     temp = templete1.substring(0, 16);
@@ -188,11 +204,11 @@ void refresh(String Templete) {
     temp = templete1.substring(17, 33);
     lcd.setCursor(0, 1);
     lcd.print(temp);
-    
+
   }
 
   getAlarm();
-  
+
 }
 String getInput(int mili, int second) {
   int i;
@@ -202,8 +218,9 @@ String getInput(int mili, int second) {
     delay(100);
     i = i + 1;
   }
-  if (i >= second) {
+  if (Serial.available() == 0) {
     serialInput = "timeout";
+    return serialInput;
   }
   while (Serial.available() > 0) {
     serialInput += char(Serial.read());
@@ -241,7 +258,7 @@ void setup() {
 void loop() {
   if (Serial.available() > 0) {
     input = getInput(2, 30);
-
+    Serial.println(input);
     if (input == "set time") {
       Serial.println("Time Setting Mode");
       Serial.println("Current RTC Time:");
@@ -264,28 +281,22 @@ void loop() {
       Serial.println("Time Setting Format:");
       Serial.println("yyyy/mm/dd/dow/hh/mm/ss");
 
-      while (Serial.available() == 0) {
-        delay(200);
-      }
+      
 
       input = getInput(2, 30);
       if (input.length() >= 15) {
 
         Serial.print("New Date:");
-        Serial.println(input.substring(0, 9));
+        Serial.println(input.substring(0, 8));
         Serial.print("New DOW:");
-        Serial.println(input.substring(9, 10));
+        Serial.println(input.substring(8, 9));
         Serial.print("New Time:");
-        Serial.println(input.substring(10, 16));
+        Serial.println(input.substring(9, 16));
         Serial.println("Are you sure? 0/1)");
 
-<<<<<<< HEAD
         Mediate = getInput(2, 30);
         if (Mediate != "0") {
-=======
-        input = getInput(2, 30);
-        if (input != "0") {
->>>>>>> parent of 9c3ec8c... first test
+
 
           Mediate = input.substring(2, 4);
           Year = Mediate.toInt();
@@ -315,7 +326,11 @@ void loop() {
           Second = Mediate.toInt();
           Clock.setSecond(Second);
         }
-      } else {
+       else if (Mediate == "0"){
+        Serial.println("No changing");
+        }
+      }
+      else {
         Serial.print("Check your formatt!");
         lcd.clear();
         lcd.setCursor(0, 0);
@@ -374,31 +389,34 @@ void loop() {
           Serial.print("Alarm Disabled");
         }
       }
-<<<<<<< HEAD
+
 
     } else {
       Serial.println("wrong command");
-=======
-      else if (input == "0") {
-        EEPROM.update(4, 0);
-        Serial.print("Alarm Disabled");
-      }
->>>>>>> parent of 9c3ec8c... first test
+
     }
     lcd.clear();
 
     refresh("default");
   }
-<<<<<<< HEAD
   //time keeping
+    next = lcdPrintSecond(templeteCol[2], templeteRow[2]);
 
-
-=======
-
-  //Time Display  new stuff   
-
-
+    if(next){
+      next = lcdPrintMinute(templeteCol[1], templeteRow[1]);
+         int chk = DHT.read22(DHT22_PIN);
+          lcdPrintTMP(templeteCol[3], templeteRow[3]);
+          lcdPrintHUM(templeteCol[7], templeteRow[7]);
+      if(next){
+        next = lcdPrintHour(templeteCol[0], templeteRow[0]);
+        if(next){
+          lcdPrintDOW(templeteCol[4], templeteRow[4]);
+          lcdPrintMonth(templeteCol[5], templeteRow[5]);
+          lcdPrintDate(templeteCol[6], templeteRow[6]);
+        }
+      }
+    }
+    delay(1000);
 }
->>>>>>> parent of 9c3ec8c... first test
-}
+
 
