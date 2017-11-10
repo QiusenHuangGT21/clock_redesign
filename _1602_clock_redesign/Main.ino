@@ -310,19 +310,19 @@ void loop() {
           Date = Mediate.toInt();
           Clock.setDate(Date);
 
-          Mediate = input.substring(9, 10);
+          Mediate = input.substring(8, 9);
           DoW = Mediate.toInt();
           Clock.setDoW(DoW);
 
-          Mediate = input.substring(10, 12);
+          Mediate = input.substring(9, 11);
           Hour = Mediate.toInt();
           Clock.setHour(Hour);
 
-          Mediate = input.substring(12, 14);
+          Mediate = input.substring(11, 13);
           Minute = Mediate.toInt();
           Clock.setMinute(Minute);
 
-          Mediate = input.substring(14, 16);
+          Mediate = input.substring(13, 15);
           Second = Mediate.toInt();
           Clock.setSecond(Second);
         }
