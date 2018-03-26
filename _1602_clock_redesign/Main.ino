@@ -281,7 +281,7 @@ void loop() {
       Serial.println("Time Setting Format:");
       Serial.println("yyyy/mm/dd/dow/hh/mm/ss");
 
-      
+
 
       input = getInput(2, 30);
       if (input.length() >= 15) {
@@ -325,6 +325,8 @@ void loop() {
           Mediate = input.substring(13, 15);
           Second = Mediate.toInt();
           Clock.setSecond(Second);
+
+          Serial.println("Change saved");
         }
        else if (Mediate == "0"){
         Serial.println("No changing");
@@ -382,6 +384,7 @@ void loop() {
             EEPROM.update(2, Mediate.toInt());
             Mediate = input.substring(6, 8);
             EEPROM.update(3, Mediate.toInt());
+            Serial.println("Change saved");
           }
         }
         else if (input == "0") {
